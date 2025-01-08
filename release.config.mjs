@@ -6,6 +6,13 @@ export default {
 	plugins: [
 		'@semantic-release/commit-analyzer',
 		'@semantic-release/release-notes-generator',
+		[
+			'semantic-release-mirror-version',
+			{
+				fileGlob: ['./README.md'],
+				placeholderRegExp: /(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/g,
+			},
+		],
 		'@semantic-release/npm',
 		[
 			'@semantic-release/exec',
@@ -18,7 +25,18 @@ export default {
 				failCmd: 'rm -f /tmp/github.npmrc',
 			},
 		],
-		'@semantic-release/git',
+		[
+			'@semantic-release/git',
+			{
+				assets: [
+					'CHANGELOG.md',
+					'README.md',
+					'package.json',
+					'package-lock.json',
+					'npm-shrinkwrap.json',
+				],
+			},
+		],
 		'@semantic-release/github',
 	],
 };
