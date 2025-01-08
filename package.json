@@ -11,6 +11,9 @@
 		"dist/index.mjs",
 		"dist/index.window.js"
 	],
+	"publishConfig": {
+		"access": "public"
+	},
 	"scripts": {
 		"prepack": "npm run build",
 		"build": "rimraf dist && rollup -c",
@@ -37,11 +40,14 @@
 		"@rollup/plugin-node-resolve": "^16.0.0",
 		"@rollup/plugin-terser": "^0.4.4",
 		"@rollup/plugin-typescript": "^12.1.2",
+		"@semantic-release/exec": "^6.0.3",
+		"@semantic-release/git": "^10.0.1",
 		"@types/jest": "^29.5.14",
 		"jest": "^29.7.0",
 		"rimraf": "^6.0.1",
 		"rollup": "^4.29.1",
 		"rollup-plugin-dts": "^6.1.1",
+		"semantic-release": "^24.2.1",
 		"ts-jest": "^29.2.5",
 		"tslib": "^2.8.1",
 		"typescript": "^5.7.2"
