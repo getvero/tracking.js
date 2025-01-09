@@ -16,7 +16,21 @@ import throwError from './utils/throwError';
 import type { Optional } from './utils/types';
 
 export interface TrackerOptions {
+	/**
+	 * The tracking API key of your project. You can find it or create a new one on the Settings page of your
+	 * Vero project.
+	 *
+	 * @see https://connect.getvero.com/settings/project/tracking-api-keys
+	 */
 	trackingApiKey: string;
+	/**
+	 * The base URL of the Vero API.
+	 *
+	 * Some browser content blockers (e.g., uBlock Origin) may block requests to the Vero API. In this case, you can
+	 * set up a reverse proxy to the Vero API and set this option to the URL of the reverse proxy.
+	 *
+	 * @default "https://api.getvero.com"
+	 */
 	trackingApiBaseUrl?: string;
 	/**
 	 * When you call {@link Tracker#user.identify}, the user's identity is stored in this {@link IdentityStore}.
@@ -208,7 +222,7 @@ class Tracker {
 
 	constructor(options: TrackerOptions) {
 		this.network = new Network(
-			options.trackingApiBaseUrl ?? 'https://api.getvero.com/api/v2',
+			options.trackingApiBaseUrl ?? 'https://api.getvero.com',
 			options.trackingApiKey,
 		);
 
@@ -259,7 +273,7 @@ class Tracker {
 		 * @param request {@link UserIdentifyRequest}
 		 */
 		identify: async (request: UserIdentifyRequest) => {
-			await this.network.send('/users/track', 'POST', {
+			await this.network.send('/api/v2/users/track', 'POST', {
 				id: request.id,
 				email: request.email,
 				channels: request.channels ?? [],
@@ -299,7 +313,7 @@ class Tracker {
 		 */
 		alias: async (request: UserAliasRequest) => {
 			const userId = this.getUserId(request);
-			await this.network.send('/users/reidentify', 'PUT', {
+			await this.network.send('/api/v2/users/reidentify', 'PUT', {
 				id: userId,
 				new_id: request.newId,
 			});
@@ -316,7 +330,7 @@ class Tracker {
 		 */
 		unsubscribe: async (request?: UserUnsubscribeRequest) => {
 			const userId = this.getUserId(request);
-			await this.network.send('/users/unsubscribe', 'POST', {
+			await this.network.send('/api/v2/users/unsubscribe', 'POST', {
 				id: userId,
 			});
 		},
@@ -327,7 +341,7 @@ class Tracker {
 		 */
 		resubscribe: async (request?: UserResubscribeRequest) => {
 			const userId = this.getUserId(request);
-			await this.network.send('/users/resubscribe', 'POST', {
+			await this.network.send('/api/v2/users/resubscribe', 'POST', {
 				id: userId,
 			});
 		},
@@ -338,7 +352,7 @@ class Tracker {
 		 */
 		delete: async (request?: UserDeleteRequest) => {
 			const userId = this.getUserId(request);
-			await this.network.send('/users/delete', 'POST', {
+			await this.network.send('/api/v2/users/delete', 'POST', {
 				id: userId,
 			});
 			if (userId === this.identityStore?.get()?.userId) {
@@ -355,7 +369,7 @@ class Tracker {
 		 */
 		edit: async (request: TagEditRequest) => {
 			const userId = this.getUserId(request);
-			await this.network.send('/users/tags/edit', 'PUT', {
+			await this.network.send('/api/v2/users/tags/edit', 'PUT', {
 				id: userId,
 				add: request.add ?? [],
 				remove: request.remove ?? [],
@@ -423,7 +437,7 @@ class Tracker {
 			};
 		},
 	) {
-		await this.network.send('/events/track', 'POST', {
+		await this.network.send('/api/v2/events/track', 'POST', {
 			identity: {
 				id: request.identity.userId,
 				email: request.identity.email,
