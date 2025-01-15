@@ -1,0 +1,47 @@
+name: Slack Notifications
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  notify-slack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "${{ github.event_name == 'issues' && 'New Issue' || github.event_name == 'pull_request' && 'New Pull Request' || 'New Comment' }}"
+            blocks:
+              - type: "header"
+                text:
+                  type: "plain_text"
+                  text: "${{ github.event_name == 'issues' && 'New Issue' || github.event_name == 'pull_request' && 'New Pull Request' || 'New Comment' }}"
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "*Repository:* ${{ github.repository }}"
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "*Title:* ${{ github.event.issue.title || github.event.pull_request.title }}"
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: |
+                    *Created by:* ${{ github.event.sender.login }}
+              - type: "section"
+                fields:
+                  - type: "mrkdwn"
+                    text: |
+                      *Link:* ${{ github.event.issue.html_url || github.event.pull_request.html_url || github.event.comment.html_url }}
