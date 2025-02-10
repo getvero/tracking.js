@@ -109,8 +109,8 @@ export interface UserIdentifyRequest extends NoSiteVisitEventRequest {
 	/**
 	 * An object containing key value pairs that represent the custom user properties you want to update.
 	 *
-	 * In the browser environment, the `language`, `timezone` and `userAgent` attributes are reserved properties
-	 * that will be automatically populated by the SDK. If any of these attributes are defined in the request,
+	 * In the browser environment, the `language`, `timezone`, `ianaTimezone` and `userAgent` attributes are reserved
+	 * properties that will be automatically populated by the SDK. If any of these attributes are defined in the request,
 	 * they will be overwritten by the SDK.
 	 *
 	 * All other keys are freeform and can be defined by you.

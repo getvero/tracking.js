@@ -507,7 +507,8 @@ describe('TESTING Tracker', () => {
 			jest.spyOn(isBrowserModule, 'default').mockReturnValue(true);
 			jest.spyOn(getDefaultReservedUserDataModule, 'default').mockReturnValue({
 				language: 'en',
-				timezone: 'Australia/Sydney',
+				timezone: 10,
+				ianaTimezone: 'Australia/Sydney',
 				userAgent:
 					'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
 			});
@@ -586,7 +587,8 @@ describe('TESTING Tracker', () => {
 									first_name: 'test',
 									last_name: 'test',
 									language: 'en',
-									timezone: 'Australia/Sydney',
+									timezone: 10,
+									ianaTimezone: 'Australia/Sydney',
 									userAgent:
 										'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
 								},
@@ -617,7 +619,8 @@ describe('TESTING Tracker', () => {
 								event_name: 'Visited site',
 								data: {
 									language: 'en',
-									timezone: 'Australia/Sydney',
+									timezone: 10,
+									ianaTimezone: 'Australia/Sydney',
 									userAgent:
 										'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
 								},
@@ -1004,7 +1007,8 @@ describe('TESTING Tracker', () => {
 								data: {
 									test: 'test',
 									language: 'en',
-									timezone: 'Australia/Sydney',
+									timezone: 10,
+									ianaTimezone: 'Australia/Sydney',
 									userAgent:
 										'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
 								},
@@ -1045,7 +1049,8 @@ describe('TESTING Tracker', () => {
 									data: {
 										test: 'test',
 										language: 'en',
-										timezone: 'Australia/Sydney',
+										timezone: 10,
+										ianaTimezone: 'Australia/Sydney',
 										userAgent:
 											'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
 									},

@@ -4,7 +4,8 @@ const getDefaultReservedUserData = () => {
 	if (isBrowser()) {
 		return {
 			language: window.navigator.language,
-			timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+			timezone: (new Date().getTimezoneOffset() / 60) * -1,
+			ianaTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 			userAgent: window.navigator.userAgent,
 		};
 	}
