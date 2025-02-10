@@ -7,8 +7,3 @@ on:
 jobs:
   lint-and-test:
     uses: ./.github/workflows/lint-and-test.yml
-
-  publish-alpha:
-    needs: lint-and-test
-    uses: ./.github/workflows/alpha-publish.yml
-    secrets: inherit
