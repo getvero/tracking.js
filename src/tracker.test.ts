@@ -281,7 +281,7 @@ describe('TESTING Tracker', () => {
 				it('SHOULD send the request to the specified trackingApiBaseUrl', () => {
 					expect(fetch).toHavePostedTimes(
 						1,
-						'https://my-vero-proxy.example.com/users/track?tracking_api_key=test-api-key',
+						'https://my-vero-proxy.example.com/api/v2/users/track?tracking_api_key=test-api-key',
 						{
 							body: {
 								id: 'test-user-id',
@@ -314,7 +314,7 @@ describe('TESTING Tracker', () => {
 				it('SHOULD send the request to the specified trackingApiBaseUrl', () => {
 					expect(fetch).toHavePutTimes(
 						1,
-						'https://my-vero-proxy.example.com/users/reidentify?tracking_api_key=test-api-key',
+						'https://my-vero-proxy.example.com/api/v2/users/reidentify?tracking_api_key=test-api-key',
 						{
 							body: {
 								id: 'test-user-id',
@@ -335,7 +335,7 @@ describe('TESTING Tracker', () => {
 				it('SHOULD send the request to the specified trackingApiBaseUrl', () => {
 					expect(fetch).toHavePostedTimes(
 						1,
-						'https://my-vero-proxy.example.com/users/unsubscribe?tracking_api_key=test-api-key',
+						'https://my-vero-proxy.example.com/api/v2/users/unsubscribe?tracking_api_key=test-api-key',
 						{
 							body: {
 								id: 'test-user-id',
@@ -355,7 +355,7 @@ describe('TESTING Tracker', () => {
 				it('SHOULD send the request to the specified trackingApiBaseUrl', () => {
 					expect(fetch).toHavePostedTimes(
 						1,
-						'https://my-vero-proxy.example.com/users/resubscribe?tracking_api_key=test-api-key',
+						'https://my-vero-proxy.example.com/api/v2/users/resubscribe?tracking_api_key=test-api-key',
 						{
 							body: {
 								id: 'test-user-id',
@@ -375,7 +375,7 @@ describe('TESTING Tracker', () => {
 				it('SHOULD send the request to the specified trackingApiBaseUrl', () => {
 					expect(fetch).toHavePostedTimes(
 						1,
-						'https://my-vero-proxy.example.com/users/delete?tracking_api_key=test-api-key',
+						'https://my-vero-proxy.example.com/api/v2/users/delete?tracking_api_key=test-api-key',
 						{
 							body: {
 								id: 'test-user-id',
@@ -397,7 +397,7 @@ describe('TESTING Tracker', () => {
 				it('SHOULD send the request to the specified trackingApiBaseUrl', async () => {
 					expect(fetch).toHavePutTimes(
 						1,
-						'https://my-vero-proxy.example.com/users/tags/edit?tracking_api_key=test-api-key',
+						'https://my-vero-proxy.example.com/api/v2/users/tags/edit?tracking_api_key=test-api-key',
 						{
 							body: {
 								id: 'test-user-id',
@@ -431,7 +431,7 @@ describe('TESTING Tracker', () => {
 				it('SHOULD track the event by sending the request to the specified trackingApiBaseUrl', () => {
 					expect(fetch).toHavePostedTimes(
 						1,
-						'https://my-vero-proxy.example.com/events/track?tracking_api_key=test-api-key',
+						'https://my-vero-proxy.example.com/api/v2/events/track?tracking_api_key=test-api-key',
 						{
 							body: {
 								identity: {
