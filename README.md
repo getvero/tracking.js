@@ -26,7 +26,7 @@ on the client-side of your website.
 Insert the following code into your `<head>` section of your HTML document:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@getvero/tracking@1.3.0/dist/index.window.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@getvero/tracking@2.0.0/dist/index.window.js"></script>
 <script>
     vero.tracker.init({
         trackingApiKey: "<YOUR_TRACKING_API_KEY_HERE>"
