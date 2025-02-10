@@ -9,7 +9,7 @@ export default {
 		[
 			'semantic-release-mirror-version',
 			{
-				fileGlob: ['./README.md'],
+				fileGlob: './README.md',
 				placeholderRegExp: /(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/g,
 			},
 		],
