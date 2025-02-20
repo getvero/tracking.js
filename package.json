@@ -2,7 +2,7 @@
 	"name": "@getvero/tracking",
 	"version": "2.0.0",
 	"description": "The official JavaScript/TypeScript SDK for tracking user properties and events on Vero",
-	"main": "dist/index.js",
+	"main": "dist/index.cjs",
 	"module": "dist/index.mjs",
 	"types": "dist/index.d.ts",
 	"files": [
