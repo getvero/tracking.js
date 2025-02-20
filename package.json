@@ -1,6 +1,6 @@
 {
 	"name": "@getvero/tracking",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "The official JavaScript/TypeScript SDK for tracking user properties and events on Vero",
 	"main": "dist/index.cjs",
 	"module": "dist/index.mjs",
