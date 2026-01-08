@@ -1,4 +1,8 @@
 import {
+	type ConversionIdStore,
+	SessionStorageConversionIdStore,
+} from './conversion-id-store';
+import {
 	type IdentityStore,
 	LocalStorageIdentityStore,
 } from './identity-store';
@@ -65,6 +69,23 @@ export interface TrackerOptions {
 	 * instead of {@link LegacySessionCookieSiteVisitedStore}.
 	 */
 	siteVisitedStore?: SiteVisitedStore;
+	/**
+	 * Stores the conversion ID extracted from the `vero_conv` query parameter in the URL.
+	 *
+	 * By default, in the browser environment, the {@link SessionStorageConversionIdStore} is used.
+	 * When the SDK is initialized and a `vero_conv` query parameter is present in the URL,
+	 * the value is stored in this store and attached to each event tracking request.
+	 *
+	 * This SDK also includes a {@link LegacySessionCookieConversionIdStore} that uses Session Cookies
+	 * to store the conversion ID. This is handy if you are migrating from a legacy setup and want to
+	 * keep identical behavior.
+	 *
+	 * Where possible, we recommend using the default {@link SessionStorageConversionIdStore}
+	 * instead of {@link LegacySessionCookieConversionIdStore}.
+	 *
+	 * @see https://help.getvero.com/vero-1/articles/conversion-tracking/
+	 */
+	conversionIdStore?: ConversionIdStore;
 }
 
 export interface NoSiteVisitEventRequest {
@@ -208,6 +229,11 @@ interface BaseEventTrackRequest {
 		 * @example "2023-05-30T04:46:31+0000"
 		 */
 		createdAt: string;
+		/**
+		 * Used for conversion tracking. This should be the `vero_conv` query parameter value received on the frontend.
+		 * @see https://help.getvero.com/vero-1/articles/conversion-tracking/
+		 */
+		veroConv?: string;
 	};
 }
 
@@ -219,6 +245,7 @@ class Tracker {
 	private readonly network: Network;
 	private readonly identityStore: IdentityStore | null;
 	private readonly siteVisitedStore: SiteVisitedStore | null;
+	private readonly conversionIdStore: ConversionIdStore | null;
 
 	constructor(options: TrackerOptions) {
 		this.network = new Network(
@@ -249,6 +276,19 @@ class Tracker {
 			} catch (e) {
 				console.error(
 					'Unable to create SessionStorageSiteVisitedStore, no site visited events will be tracked',
+					e,
+				);
+			}
+		}
+		this.conversionIdStore = options.conversionIdStore ?? null;
+		if (!this.conversionIdStore && isBrowser()) {
+			try {
+				this.conversionIdStore = new SessionStorageConversionIdStore({
+					keyNamespace: hashedTrackingKey,
+				});
+			} catch (e) {
+				console.error(
+					'Unable to create SessionStorageConversionIdStore, no vero_conv will be automatically attached to events',
 					e,
 				);
 			}
@@ -437,6 +477,8 @@ class Tracker {
 			};
 		},
 	) {
+		const conversionId =
+			request.extras?.veroConv ?? this.conversionIdStore?.get();
 		await this.network.send('/api/v2/events/track', 'POST', {
 			identity: {
 				id: request.identity.userId,
@@ -447,6 +489,7 @@ class Tracker {
 			extras: {
 				source: request.extras?.source ?? getHostname(),
 				created_at: request.extras?.createdAt ?? new Date().toISOString(),
+				...(conversionId && { vero_conv: conversionId }),
 			},
 		});
 	}

@@ -1,5 +1,6 @@
 import fetchMock from '@fetch-mock/jest';
 import LocalStorageMock from '../test/local-storage-mock';
+import type { ConversionIdStore } from './conversion-id-store';
 import type { IdentityStore } from './identity-store';
 import Tracker from './tracker';
 import * as getDefaultReservedUserDataModule from './utils/getDefaultReservedUserData';
@@ -10,6 +11,7 @@ import * as isBrowserModule from './utils/isBrowser';
 jest.mock('./utils/isBrowser');
 jest.mock('./utils/getDefaultReservedUserData');
 jest.mock('./utils/getHostname');
+jest.mock('./utils/getVeroConvParam');
 
 describe('TESTING Tracker', () => {
 	beforeEach(() => {
@@ -489,6 +491,177 @@ describe('TESTING Tracker', () => {
 					'test-user-id',
 					'test@example.com',
 				);
+			});
+		});
+
+		describe('WHEN a custom conversionIdStore is supplied', () => {
+			let tracker: Tracker;
+			let conversionIdStore: ConversionIdStore;
+
+			beforeEach(() => {
+				conversionIdStore = {
+					get: jest.fn().mockReturnValue('test-conversion-id'),
+				};
+				tracker = new Tracker({
+					trackingApiKey: 'test-api-key',
+					conversionIdStore: conversionIdStore,
+				});
+			});
+
+			describe('WHEN event.track is called', () => {
+				beforeEach(async () => {
+					jest.useFakeTimers();
+
+					await tracker.event.track({
+						identity: {
+							userId: 'test-user-id',
+							email: 'test@example.com',
+						},
+						eventName: 'test-event-name',
+						data: {
+							test: 'test',
+						},
+					});
+				});
+
+				afterEach(() => {
+					jest.useRealTimers();
+				});
+
+				it('SHOULD include the conversion ID from the store in the request', async () => {
+					expect(fetch).toHavePostedTimes(
+						1,
+						'https://api.getvero.com/api/v2/events/track?tracking_api_key=test-api-key',
+						{
+							body: {
+								identity: {
+									id: 'test-user-id',
+									email: 'test@example.com',
+								},
+								event_name: 'test-event-name',
+								data: {
+									test: 'test',
+								},
+								extras: {
+									created_at: new Date().toISOString(),
+									vero_conv: 'test-conversion-id',
+								},
+							},
+						},
+					);
+				});
+
+				it('SHOULD call the conversionIdStore.get method', () => {
+					expect(conversionIdStore.get).toHaveBeenCalled();
+				});
+			});
+
+			describe('WHEN event.track is called with explicit veroConv in extras', () => {
+				beforeEach(async () => {
+					jest.useFakeTimers();
+
+					await tracker.event.track({
+						identity: {
+							userId: 'test-user-id',
+							email: 'test@example.com',
+						},
+						eventName: 'test-event-name',
+						data: {
+							test: 'test',
+						},
+						extras: {
+							source: 'test-source',
+							createdAt: '2024-01-01T00:00:00.000Z',
+							veroConv: 'explicit-conversion-id',
+						},
+					});
+				});
+
+				afterEach(() => {
+					jest.useRealTimers();
+				});
+
+				it('SHOULD use the explicit veroConv instead of the store value', async () => {
+					expect(fetch).toHavePostedTimes(
+						1,
+						'https://api.getvero.com/api/v2/events/track?tracking_api_key=test-api-key',
+						{
+							body: {
+								identity: {
+									id: 'test-user-id',
+									email: 'test@example.com',
+								},
+								event_name: 'test-event-name',
+								data: {
+									test: 'test',
+								},
+								extras: {
+									source: 'test-source',
+									created_at: '2024-01-01T00:00:00.000Z',
+									vero_conv: 'explicit-conversion-id',
+								},
+							},
+						},
+					);
+				});
+			});
+		});
+
+		describe('WHEN no conversionIdStore is supplied and conversionIdStore.get returns undefined', () => {
+			let tracker: Tracker;
+			let conversionIdStore: ConversionIdStore;
+
+			beforeEach(() => {
+				conversionIdStore = {
+					get: jest.fn().mockReturnValue(undefined),
+				};
+				tracker = new Tracker({
+					trackingApiKey: 'test-api-key',
+					conversionIdStore: conversionIdStore,
+				});
+			});
+
+			describe('WHEN event.track is called', () => {
+				beforeEach(async () => {
+					jest.useFakeTimers();
+
+					await tracker.event.track({
+						identity: {
+							userId: 'test-user-id',
+							email: 'test@example.com',
+						},
+						eventName: 'test-event-name',
+						data: {
+							test: 'test',
+						},
+					});
+				});
+
+				afterEach(() => {
+					jest.useRealTimers();
+				});
+
+				it('SHOULD NOT include vero_conv in the request extras', async () => {
+					expect(fetch).toHavePostedTimes(
+						1,
+						'https://api.getvero.com/api/v2/events/track?tracking_api_key=test-api-key',
+						{
+							body: {
+								identity: {
+									id: 'test-user-id',
+									email: 'test@example.com',
+								},
+								event_name: 'test-event-name',
+								data: {
+									test: 'test',
+								},
+								extras: {
+									created_at: new Date().toISOString(),
+								},
+							},
+						},
+					);
+				});
 			});
 		});
 	});
@@ -1098,6 +1271,120 @@ describe('TESTING Tracker', () => {
 							localStorage.getItem('test-hash:__vero_tracking_email'),
 						).toBe('different@example.com');
 					});
+				});
+			});
+
+			describe('WHEN sessionStorage has a conversion ID stored', () => {
+				beforeEach(async () => {
+					jest.useFakeTimers();
+
+					sessionStorage.setItem(
+						'test-hash:__vero_conv',
+						'stored-conversion-id',
+					);
+
+					await tracker.event.track({
+						identity: {
+							userId: 'test-user-id',
+							email: 'test@example.com',
+						},
+						eventName: 'test-event-with-conversion',
+						data: {
+							test: 'test',
+						},
+					});
+				});
+
+				afterEach(() => {
+					jest.useRealTimers();
+					sessionStorage.removeItem('test-hash:__vero_conv');
+				});
+
+				it('SHOULD include the conversion ID from sessionStorage in the request', async () => {
+					expect(fetch).toHavePostedTimes(
+						1,
+						'https://api.getvero.com/api/v2/events/track?tracking_api_key=test-api-key',
+						{
+							body: {
+								identity: {
+									id: 'test-user-id',
+									email: 'test@example.com',
+								},
+								event_name: 'test-event-with-conversion',
+								data: {
+									test: 'test',
+									language: 'en',
+									timezone: 10,
+									ianaTimezone: 'Australia/Sydney',
+									userAgent:
+										'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+								},
+								extras: {
+									source: 'hostname.example.com',
+									created_at: new Date().toISOString(),
+									vero_conv: 'stored-conversion-id',
+								},
+							},
+						},
+					);
+				});
+			});
+
+			describe('WHEN event.track is called with explicit veroConv in extras', () => {
+				beforeEach(async () => {
+					sessionStorage.setItem(
+						'test-hash:__vero_conv',
+						'stored-conversion-id',
+					);
+
+					await tracker.event.track({
+						identity: {
+							userId: 'test-user-id',
+							email: 'test@example.com',
+						},
+						eventName: 'test-event-name',
+						data: {
+							test: 'test',
+						},
+						extras: {
+							source: 'custom-source',
+							createdAt: '2024-01-01T00:00:00.000Z',
+							veroConv: 'explicit-conversion-id',
+						},
+					});
+				});
+
+				afterEach(() => {
+					sessionStorage.removeItem('test-hash:__vero_conv');
+				});
+
+				it('SHOULD use the explicit veroConv instead of the sessionStorage value', async () => {
+					expect(fetch).toHavePostedTimes(
+						1,
+						'https://api.getvero.com/api/v2/events/track?tracking_api_key=test-api-key',
+						{
+							body: {
+								identity: {
+									id: 'test-user-id',
+									email: 'test@example.com',
+								},
+								event_name: 'test-event-name',
+								data: {
+									test: 'test',
+									language: 'en',
+									timezone: 10,
+									ianaTimezone: 'Australia/Sydney',
+									userAgent:
+										'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+								},
+								extras: {
+									source: 'custom-source',
+									created_at: '2024-01-01T00:00:00.000Z',
+									vero_conv: 'explicit-conversion-id',
+								},
+							},
+						},
+					);
 				});
 			});
 		});

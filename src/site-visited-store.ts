@@ -1,4 +1,5 @@
 import isBrowser from './utils/isBrowser';
+import normalizeCookieDomainForSubdomains from './utils/normalizeCookieDomainForSubdomains';
 
 export interface SiteVisitedStore {
 	hasVisited(userId: string): boolean;
@@ -58,7 +59,9 @@ export class LegacySessionCookieSiteVisitedStore implements SiteVisitedStore {
 				'Creating SessionCookieSiteVisitedStore in an invalid environment (is this a browser environment?)',
 			);
 		}
-		this.cookieDomain = options.cookieDomain;
+		this.cookieDomain = options.cookieDomain
+			? normalizeCookieDomainForSubdomains(options.cookieDomain)
+			: undefined;
 	}
 
 	hasVisited() {
@@ -74,7 +77,7 @@ export class LegacySessionCookieSiteVisitedStore implements SiteVisitedStore {
 	setVisited() {
 		let cookieString = `${LegacySessionCookieSiteVisitedStore.COOKIE_NAME}=true; path=/`;
 		if (this.cookieDomain) {
-			cookieString += `; domain=.${this.cookieDomain}`;
+			cookieString += `; domain=${this.cookieDomain}`;
 		}
 		document.cookie = cookieString;
 	}
@@ -82,7 +85,7 @@ export class LegacySessionCookieSiteVisitedStore implements SiteVisitedStore {
 	clear() {
 		let cookieString = `${LegacySessionCookieSiteVisitedStore.COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
 		if (this.cookieDomain) {
-			cookieString += `; domain=.${this.cookieDomain}`;
+			cookieString += `; domain=${this.cookieDomain}`;
 		}
 		document.cookie = cookieString;
 	}
