@@ -43,6 +43,11 @@ export type {
 	EventTrackRequest,
 } from './tracker';
 export {
+	type ConversionIdStore,
+	SessionStorageConversionIdStore,
+	LegacySessionCookieConversionIdStore,
+} from './conversion-id-store';
+export {
 	type IdentityStore,
 	LocalStorageIdentityStore,
 } from './identity-store';
