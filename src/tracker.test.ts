@@ -53,6 +53,8 @@ describe('TESTING Tracker', () => {
 
 			describe('WHEN user.identify is called', () => {
 				beforeEach(async () => {
+					jest.useFakeTimers();
+
 					await tracker.user.identify({
 						id: 'test-user-id',
 						email: 'test@example.com',
@@ -68,6 +70,10 @@ describe('TESTING Tracker', () => {
 							last_name: 'test',
 						},
 					});
+				});
+
+				afterEach(() => {
+					jest.useRealTimers();
 				});
 
 				it('SHOULD send the request to the default trackingApiBaseUrl', async () => {
@@ -88,6 +94,52 @@ describe('TESTING Tracker', () => {
 								data: {
 									first_name: 'test',
 									last_name: 'test',
+								},
+								extras: {
+									created_at: new Date().toISOString(),
+								},
+							},
+						},
+					);
+				});
+			});
+
+			describe('WHEN user.identify is called with extras', () => {
+				beforeEach(async () => {
+					jest.useFakeTimers();
+
+					await tracker.user.identify({
+						id: 'test-user-id',
+						email: 'test@example.com',
+						data: {
+							first_name: 'test',
+						},
+						extras: {
+							createdAt: '2024-01-01T00:00:00.000Z',
+							updateOnly: true,
+						},
+					});
+				});
+
+				afterEach(() => {
+					jest.useRealTimers();
+				});
+
+				it('SHOULD send extras as snake_case fields', async () => {
+					expect(fetch).toHavePostedTimes(
+						1,
+						'https://api.getvero.com/api/v2/users/track?tracking_api_key=test-api-key',
+						{
+							body: {
+								id: 'test-user-id',
+								email: 'test@example.com',
+								channels: [],
+								data: {
+									first_name: 'test',
+								},
+								extras: {
+									created_at: '2024-01-01T00:00:00.000Z',
+									update_only: true,
 								},
 							},
 						},
@@ -263,6 +315,8 @@ describe('TESTING Tracker', () => {
 
 			describe('WHEN user.identify is called', () => {
 				beforeEach(async () => {
+					jest.useFakeTimers();
+
 					await tracker.user.identify({
 						id: 'test-user-id',
 						email: 'test@example.com',
@@ -278,6 +332,10 @@ describe('TESTING Tracker', () => {
 							last_name: 'test',
 						},
 					});
+				});
+
+				afterEach(() => {
+					jest.useRealTimers();
 				});
 
 				it('SHOULD send the request to the specified trackingApiBaseUrl', () => {
@@ -298,6 +356,9 @@ describe('TESTING Tracker', () => {
 								data: {
 									first_name: 'test',
 									last_name: 'test',
+								},
+								extras: {
+									created_at: new Date().toISOString(),
 								},
 							},
 						},
@@ -765,6 +826,9 @@ describe('TESTING Tracker', () => {
 									userAgent:
 										'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
 								},
+								extras: {
+									created_at: new Date().toISOString(),
+								},
 							},
 						},
 					);
@@ -812,6 +876,81 @@ describe('TESTING Tracker', () => {
 							'test-hash:__vero_tracking_site_visited:test-user-id',
 						),
 					).toBe('true');
+				});
+			});
+
+			describe('WHEN user.identify is called with extras', () => {
+				beforeEach(async () => {
+					jest.useFakeTimers();
+
+					await tracker.user.identify({
+						id: 'test-user-id',
+						email: 'test@example.com',
+						data: {
+							first_name: 'test',
+						},
+						extras: {
+							createdAt: '2024-01-01T00:00:00.000Z',
+							updateOnly: true,
+						},
+					});
+				});
+
+				afterEach(() => {
+					jest.useRealTimers();
+				});
+
+				it('SHOULD send extras on the identify request only', async () => {
+					expect(fetch).toHavePostedTimes(
+						1,
+						'https://api.getvero.com/api/v2/users/track?tracking_api_key=test-api-key',
+						{
+							body: {
+								id: 'test-user-id',
+								email: 'test@example.com',
+								channels: [],
+								data: {
+									first_name: 'test',
+									language: 'en',
+									timezone: 10,
+									ianaTimezone: 'Australia/Sydney',
+									userAgent:
+										'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+								},
+								extras: {
+									created_at: '2024-01-01T00:00:00.000Z',
+									update_only: true,
+								},
+							},
+						},
+					);
+				});
+
+				it('SHOULD still track a "visited site" event with event extras', async () => {
+					expect(fetch).toHavePostedTimes(
+						1,
+						'https://api.getvero.com/api/v2/events/track?tracking_api_key=test-api-key',
+						{
+							body: {
+								identity: {
+									id: 'test-user-id',
+									email: 'test@example.com',
+								},
+								event_name: 'Visited site',
+								data: {
+									language: 'en',
+									timezone: 10,
+									ianaTimezone: 'Australia/Sydney',
+									userAgent:
+										'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+								},
+								extras: {
+									source: 'hostname.example.com',
+									created_at: new Date().toISOString(),
+								},
+							},
+						},
+					);
 				});
 			});
 
