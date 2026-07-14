@@ -139,6 +139,22 @@ export interface UserIdentifyRequest extends NoSiteVisitEventRequest {
 	 * @example { first_name: "Damien", last_name: "Brzoska", age: 30 }
 	 */
 	data?: Record<string, string | number>;
+	/**
+	 * An object containing key value pairs that represent the reserved,
+	 * Vero-specific `created_at` and `update_only` properties.
+	 *
+	 * @see {@link Tracker#user.identify}
+	 */
+	extras?: {
+		/**
+		 * @example "2023-05-30T04:46:31+0000"
+		 */
+		createdAt?: string;
+		/**
+		 * @example true
+		 */
+		updateOnly?: boolean;
+	};
 }
 
 export interface OptionalUserIdRequest {
@@ -318,6 +334,10 @@ class Tracker {
 				email: request.email,
 				channels: request.channels ?? [],
 				data: { ...request.data, ...getDefaultReservedUserData() },
+				extras: {
+					created_at: request.extras?.createdAt ?? new Date().toISOString(),
+					update_only: request.extras?.updateOnly,
+				},
 			});
 			this.identityStore?.save(request.id, request.email);
 
