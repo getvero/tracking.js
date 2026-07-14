@@ -151,7 +151,7 @@ export interface UserIdentifyRequest extends NoSiteVisitEventRequest {
 		 */
 		createdAt?: string;
 		/**
-		 * @example "true"
+		 * @example true
 		 */
 		updateOnly?: boolean;
 	};
@@ -336,9 +336,7 @@ class Tracker {
 				data: { ...request.data, ...getDefaultReservedUserData() },
 				extras: {
 					created_at: request.extras?.createdAt ?? new Date().toISOString(),
-					...(request.extras?.updateOnly && {
-						update_only: request.extras.updateOnly,
-					}),
+					update_only: request.extras?.updateOnly,
 				},
 			});
 			this.identityStore?.save(request.id, request.email);
