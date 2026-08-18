@@ -54,7 +54,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create PR Comment
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const packageName = require('./package.json').name;
@@ -66,7 +66,12 @@ jobs:
               state: 'open',
               head: `${context.repo.owner}:${context.ref.replace('refs/heads/', '')}`
             })
-            const pr = context.issue.number || issues.data[0].number
+            const pr = context.issue.number || issues.data[0]?.number
+
+            if (!pr) {
+              core.info(`No open PR for branch ${context.ref.replace('refs/heads/', '')}; skipping PR comment.`)
+              return
+            }
 
             github.rest.issues.createComment({
               owner: context.repo.owner,
